@@ -17,8 +17,8 @@ RUN npm ci
 COPY shared/ ./shared/
 COPY backend/ ./backend/
 
-# Build backend TypeScript
-RUN npm run build --workspace backend
+# Build shared and backend TypeScript
+RUN npm run build --workspace shared && npm run build --workspace backend
 
 # Remove devDependencies to minimize image size
 RUN npm prune --production

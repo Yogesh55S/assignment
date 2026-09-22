@@ -7,7 +7,11 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@interview-prep/shared": ["../shared/index.ts"],
+      "@interview-prep/shared/*": ["../shared/*"]
+    }
   },
   "include": ["src/**/*"]
 }
