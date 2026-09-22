@@ -6,18 +6,18 @@
   "scripts": {
     "build": "tsc"
   },
-  "main": "./index.ts",
+  "main": "./index.js",
   "exports": {
-    ".": "./index.ts",
-    "./types/kit": "./types/kit.ts",
-    "./types/editableKit": "./types/editableKit.ts",
-    "./types/scheduling": "./types/scheduling.ts",
-    "./validators/kitSchema": "./validators/kitSchema.ts",
-    "./validators/editableKitSchema": "./validators/editableKitSchema.ts",
-    "./constants": "./constants/index.ts",
-    "./services/coverage/coverageService": "./services/coverage/coverageService.ts",
-    "./services/schedule/scheduleService": "./services/schedule/scheduleService.ts",
-    "./services/schedule/scheduleValidation": "./services/schedule/scheduleValidation.ts",
+    ".": "./index.js",
+    "./types/kit": "./types/kit.js",
+    "./types/editableKit": "./types/editableKit.js",
+    "./types/scheduling": "./types/scheduling.js",
+    "./validators/kitSchema": "./validators/kitSchema.js",
+    "./validators/editableKitSchema": "./validators/editableKitSchema.js",
+    "./constants": "./constants/index.js",
+    "./services/coverage/coverageService": "./services/coverage/coverageService.js",
+    "./services/schedule/scheduleService": "./services/schedule/scheduleService.js",
+    "./services/schedule/scheduleValidation": "./services/schedule/scheduleValidation.js",
     "./*": "./*"
   },
   "dependencies": {
