@@ -6,19 +6,18 @@
   "scripts": {
     "build": "tsc"
   },
-  "main": "./index.js",
+  "main": "./dist/index.js",
   "exports": {
-    ".": "./index.js",
-    "./types/kit": "./types/kit.js",
-    "./types/editableKit": "./types/editableKit.js",
-    "./types/scheduling": "./types/scheduling.js",
-    "./validators/kitSchema": "./validators/kitSchema.js",
-    "./validators/editableKitSchema": "./validators/editableKitSchema.js",
-    "./constants": "./constants/index.js",
-    "./services/coverage/coverageService": "./services/coverage/coverageService.js",
-    "./services/schedule/scheduleService": "./services/schedule/scheduleService.js",
-    "./services/schedule/scheduleValidation": "./services/schedule/scheduleValidation.js",
-    "./*": "./*"
+    ".": "./dist/index.js",
+    "./types/kit": "./dist/types/kit.js",
+    "./types/editableKit": "./dist/types/editableKit.js",
+    "./types/scheduling": "./dist/types/scheduling.js",
+    "./validators/kitSchema": "./dist/validators/kitSchema.js",
+    "./validators/editableKitSchema": "./dist/validators/editableKitSchema.js",
+    "./constants": "./dist/constants/index.js",
+    "./services/coverage/coverageService": "./dist/services/coverage/coverageService.js",
+    "./services/schedule/scheduleService": "./dist/services/schedule/scheduleService.js",
+    "./services/schedule/scheduleValidation": "./dist/services/schedule/scheduleValidation.js"
   },
   "dependencies": {
     "zod": "^3.23.8"
