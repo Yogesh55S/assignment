@@ -1,0 +1,26 @@
+{
+  "name": "@interview-prep/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "main": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./types/kit": "./types/kit.ts",
+    "./types/editableKit": "./types/editableKit.ts",
+    "./types/scheduling": "./types/scheduling.ts",
+    "./validators/kitSchema": "./validators/kitSchema.ts",
+    "./validators/editableKitSchema": "./validators/editableKitSchema.ts",
+    "./constants": "./constants/index.ts",
+    "./services/coverage/coverageService": "./services/coverage/coverageService.ts",
+    "./services/schedule/scheduleService": "./services/schedule/scheduleService.ts",
+    "./services/schedule/scheduleValidation": "./services/schedule/scheduleValidation.ts",
+    "./*": "./*"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  }
+}

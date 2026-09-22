@@ -1,0 +1,14 @@
+[
+  {
+    "id": "case-senior-backend",
+    "jd": "Senior Backend Engineer. Requirements: 5+ years of experience with Node.js and TypeScript, distributed systems design, PostgreSQL or MongoDB schema modeling, microservices architecture, and automated testing.",
+    "company_url": "https://stripe.com",
+    "days": 5
+  },
+  {
+    "id": "case-frontend-react",
+    "jd": "Staff Frontend Engineer. Requirements: Deep expertise in React, Next.js App Router, TypeScript, modern CSS/Tailwind, web performance optimization, core web vitals, and accessibility standards (WCAG).",
+    "company_url": "https://vercel.com",
+    "days": 7
+  }
+]

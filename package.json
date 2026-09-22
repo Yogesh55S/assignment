@@ -1,0 +1,24 @@
+{
+  "name": "ai-interview-prep-kit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production-minded full-stack TypeScript AI Interview Prep Kit",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace frontend\" \"npm run dev --workspace backend\"",
+    "build": "npm run build --workspace shared && npm run build --workspace backend && npm run build --workspace frontend",
+    "test": "npm run test --workspace backend",
+    "lint": "npm run lint --workspace frontend && npm run lint --workspace backend",
+    "evaluate": "npm run evaluate --workspace backend --"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

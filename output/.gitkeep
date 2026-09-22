@@ -1,0 +1,3 @@
+# Generated output directory
+This directory stores output files from the evaluation CLI.
+It is ignored by git.
