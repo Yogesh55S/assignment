@@ -7,8 +7,8 @@ shared/node_modules
 .pnp.js
 
 # Testing and coverage
-coverage
-backend/coverage
+/coverage
+/backend/coverage
 
 # Next.js build output
 .next
