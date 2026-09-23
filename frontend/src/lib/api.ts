@@ -17,7 +17,7 @@ import type {
 
 export type { PracticeProgressResponse };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export interface ApiError {
   code: string;
