@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "test": "vitest run",
     "lint": "tsc --noEmit",
-    "evaluate": "tsx src/scripts/evaluate.ts"
+    "evaluate": "tsx src/scripts/evaluate.ts",
+    "smoke:railway": "tsx src/scripts/liveSmokeTest.ts"
   },
   "dependencies": {
     "@interview-prep/shared": "*",

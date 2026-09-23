@@ -7,17 +7,56 @@
     "build": "tsc"
   },
   "main": "./dist/index.js",
+  "types": "./index.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./types/kit": "./dist/types/kit.js",
-    "./types/editableKit": "./dist/types/editableKit.js",
-    "./types/scheduling": "./dist/types/scheduling.js",
-    "./validators/kitSchema": "./dist/validators/kitSchema.js",
-    "./validators/editableKitSchema": "./dist/validators/editableKitSchema.js",
-    "./constants": "./dist/constants/index.js",
-    "./services/coverage/coverageService": "./dist/services/coverage/coverageService.js",
-    "./services/schedule/scheduleService": "./dist/services/schedule/scheduleService.js",
-    "./services/schedule/scheduleValidation": "./dist/services/schedule/scheduleValidation.js"
+    ".": {
+      "types": "./index.ts",
+      "default": "./dist/index.js"
+    },
+    "./types/kit": {
+      "types": "./types/kit.ts",
+      "default": "./dist/types/kit.js"
+    },
+    "./types/editableKit": {
+      "types": "./types/editableKit.ts",
+      "default": "./dist/types/editableKit.js"
+    },
+    "./types/scheduling": {
+      "types": "./types/scheduling.ts",
+      "default": "./dist/types/scheduling.js"
+    },
+    "./validators/kitSchema": {
+      "types": "./validators/kitSchema.ts",
+      "default": "./dist/validators/kitSchema.js"
+    },
+    "./validators/editableKitSchema": {
+      "types": "./validators/editableKitSchema.ts",
+      "default": "./dist/validators/editableKitSchema.js"
+    },
+    "./constants": {
+      "types": "./constants/index.ts",
+      "default": "./dist/constants/index.js"
+    },
+    "./services/coverage/coverageService": {
+      "types": "./services/coverage/coverageService.ts",
+      "default": "./dist/services/coverage/coverageService.js"
+    },
+    "./services/schedule/scheduleService": {
+      "types": "./services/schedule/scheduleService.ts",
+      "default": "./dist/services/schedule/scheduleService.js"
+    },
+    "./services/schedule/scheduleValidation": {
+      "types": "./services/schedule/scheduleValidation.ts",
+      "default": "./dist/services/schedule/scheduleValidation.js"
+    },
+    "./utils/stripInternalKitMetadata": {
+      "types": "./utils/stripInternalKitMetadata.ts",
+      "default": "./dist/utils/stripInternalKitMetadata.js"
+    },
+    "./*": {
+      "types": "./*.ts",
+      "default": "./dist/*.js"
+    }
   },
   "dependencies": {
     "zod": "^3.23.8"
