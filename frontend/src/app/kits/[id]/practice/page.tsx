@@ -68,7 +68,7 @@ export default function PracticePage() {
     return (
       <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
         <Header />
-        <main className="flex-1 flex items-center justify-center">
+        <main className="flex-1 flex items-center justify-center p-4">
           <LoadingState message="Preparing practice session..." />
         </main>
       </div>
@@ -79,7 +79,7 @@ export default function PracticePage() {
     return (
       <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
         <Header userEmail={user?.email} />
-        <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-12">
+        <main className="flex-1 max-w-2xl w-full mx-auto px-3 sm:px-4 py-8 sm:py-12">
           <ErrorAlert message={error || "Unable to load practice session."} />
         </main>
       </div>
@@ -90,7 +90,7 @@ export default function PracticePage() {
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16">
       <Header userEmail={user?.email} />
 
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8">
+      <main className="flex-1 max-w-4xl 2xl:max-w-6xl w-full mx-auto px-3 sm:px-6 py-6 sm:py-8">
         <PracticeSession
           kitId={kitId}
           role={kitData.kit.role.title}

@@ -238,15 +238,15 @@ export function PracticeSession({
       </div>
 
       {/* Flashcard Viewer */}
-      <div className="relative min-h-[320px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm flex flex-col justify-between space-y-6">
+      <div className="relative min-h-[280px] sm:min-h-[320px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-8 shadow-sm flex flex-col justify-between space-y-6">
         {/* Card Header: Card Index & Previous Confidence */}
         <div className="flex items-center justify-between text-xs text-slate-400">
-          <span className="font-mono font-medium">
+          <span className="font-mono font-medium truncate max-w-[160px] sm:max-w-none">
             Card {currentIndex + 1} of {orderedCards.length} ({currentCard.id})
           </span>
 
           {currentProg ? (
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full shrink-0">
               <span>Confidence:</span>
               <strong
                 className={
@@ -265,7 +265,7 @@ export function PracticeSession({
               </strong>
             </span>
           ) : (
-            <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full">
+            <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full shrink-0">
               Uncovered
             </span>
           )}
@@ -277,7 +277,7 @@ export function PracticeSession({
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">
               Question / Prompt
             </span>
-            <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-relaxed max-w-xl mx-auto">
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white leading-relaxed max-w-xl mx-auto">
               {currentCard.front}
             </p>
           </div>
@@ -287,7 +287,7 @@ export function PracticeSession({
               <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest block mb-2">
                 Target Answer & Key Concepts
               </span>
-              <p className="text-base sm:text-lg text-slate-800 dark:text-slate-200 font-mono leading-relaxed max-w-xl mx-auto bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700/60">
+              <p className="text-sm sm:text-lg text-slate-800 dark:text-slate-200 font-mono leading-relaxed max-w-xl mx-auto bg-slate-50 dark:bg-slate-800/50 p-3 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-700/60">
                 {currentCard.back}
               </p>
             </div>
@@ -298,7 +298,7 @@ export function PracticeSession({
                 onClick={handleReveal}
                 className="px-6 py-3 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
-                Reveal Answer <span className="text-xs opacity-75 ml-1">[Space]</span>
+                Reveal Answer <span className="text-xs opacity-75 ml-1 hidden sm:inline">[Space]</span>
               </button>
             </div>
           )}
@@ -317,7 +317,7 @@ export function PracticeSession({
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-3 max-w-md mx-auto">
+            <div className="grid grid-cols-1 min-[360px]:grid-cols-3 gap-2 sm:gap-3 max-w-md mx-auto">
               <button
                 type="button"
                 onClick={() => handleRateConfidence(1)}
