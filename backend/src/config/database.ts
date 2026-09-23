@@ -23,7 +23,7 @@ export async function connectDatabase(): Promise<void> {
     console.log(`[Database] Connecting to MongoDB (${maskedTarget})...`);
 
     await mongoose.connect(env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 15000,
       autoIndex: true,
     });
 
