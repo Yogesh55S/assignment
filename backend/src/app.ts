@@ -13,6 +13,9 @@ export function createApp() {
   const app = express();
   const env = getEnv();
 
+  // Trust first proxy (Railway/Vercel load balancer) for HTTPS cookie support
+  app.set("trust proxy", 1);
+
   // 1. Security & Core Middlewares
   app.use(helmet());
   app.use(

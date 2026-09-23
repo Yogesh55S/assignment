@@ -25,6 +25,12 @@ function cleanJsonText(raw: string): string {
   return text.trim();
 }
 
+function sanitizeEnvString(val: string | undefined): string | undefined {
+  if (!val) return val;
+  // Remove literal wrapping quotes and escaped quotes that Railway might inject
+  return val.trim().replace(/^["']|["']$/g, '').replace(/\\"/g, '').trim();
+}
+
 export function createGeminiClient(options?: {
   apiKey?: string;
   model?: string;
@@ -32,8 +38,12 @@ export function createGeminiClient(options?: {
   sleepImpl?: (ms: number) => Promise<void>;
 }): LlmClient {
   const env = getEnv();
-  const apiKey = options?.apiKey !== undefined ? options.apiKey : env.LLM_API_KEY;
-  const model = options?.model || env.LLM_MODEL || "gemini-1.5-flash";
+  const rawApiKey = options?.apiKey !== undefined ? options.apiKey : env.LLM_API_KEY;
+  const apiKey = sanitizeEnvString(rawApiKey);
+  
+  const rawModel = options?.model || env.LLM_MODEL || "gemini-flash-latest";
+  const model = sanitizeEnvString(rawModel) || "gemini-flash-latest";
+  
   const fetchFn = options?.fetchImpl ?? fetch;
   const sleepFn = options?.sleepImpl ?? defaultSleep;
 
