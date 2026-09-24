@@ -3,17 +3,15 @@ import { KitService } from "../../src/services/persistence/kitService.js";
 import { Kit } from "../../src/models/Kit.js";
 import { validateInterviewPrepKit } from "@interview-prep/shared/validators/kitSchema";
 
-describe("Section 1: Failed Generation & Data Integrity Tests", () => {
+describe("Failed Generation Data Integrity", () => {
   it("validateInterviewPrepKit throws ZodError on invalid/incomplete kit payload", () => {
     const invalidKit = {
       source: { company: "Test" },
-      // missing required fields
     };
     expect(() => validateInterviewPrepKit(invalidKit)).toThrow();
   });
 
   it("markKitFailed sets kit to null and records safe error details", async () => {
-    // Unit verification of markKitFailed interface contract
     expect(KitService.markKitFailed).toBeDefined();
     expect(KitService.createGeneratingKit).toBeDefined();
     expect(KitService.resetFailedKitToGenerating).toBeDefined();

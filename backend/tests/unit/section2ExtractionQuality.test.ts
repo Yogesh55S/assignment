@@ -23,7 +23,7 @@ Nice to Have:
 
 const THIN_JD_FIXTURE = `Need a web dev.`;
 
-describe("Section 2: Requirement Extraction Quality & Safeguards", () => {
+describe("Requirement Extraction Quality & Safeguards", () => {
   it("extracts role title, requirement kinds, priorities, and stable IDs from detailed JD fixture", async () => {
     const mockLlmClient: LlmClient = {
       generateJson: async () => ({
@@ -42,7 +42,6 @@ describe("Section 2: Requirement Extraction Quality & Safeguards", () => {
             { text: "Mentoring junior engineers", kind: "behavioural", priority: "must" },
             { text: "Fintech domain knowledge", kind: "domain", priority: "nice" },
             { text: "AWS cloud experience", kind: "technical", priority: "nice" },
-            // Intentional duplicate to test deduplication
             { text: "React experience", kind: "technical", priority: "must" },
           ],
           extraction_note: "Extracted 6 distinct requirements.",
@@ -54,10 +53,8 @@ describe("Section 2: Requirement Extraction Quality & Safeguards", () => {
       llmClient: mockLlmClient,
     });
 
-    // 1. Title assertion
     expect(result.title).toBe("Senior Full-Stack Engineer");
 
-    // 2. Technical + Must assertions
     const reactReq = result.requirements.find((r) => r.text.includes("React"));
     expect(reactReq).toBeDefined();
     expect(reactReq?.kind).toBe("technical");
@@ -73,35 +70,29 @@ describe("Section 2: Requirement Extraction Quality & Safeguards", () => {
     expect(mongoReq?.kind).toBe("technical");
     expect(mongoReq?.priority).toBe("must");
 
-    // 3. Mentoring = behavioural + must
     const mentorReq = result.requirements.find((r) => r.text.includes("Mentoring"));
     expect(mentorReq).toBeDefined();
     expect(mentorReq?.kind).toBe("behavioural");
     expect(mentorReq?.priority).toBe("must");
 
-    // 4. Fintech = domain + nice
     const fintechReq = result.requirements.find((r) => r.text.includes("Fintech"));
     expect(fintechReq).toBeDefined();
     expect(fintechReq?.kind).toBe("domain");
     expect(fintechReq?.priority).toBe("nice");
 
-    // 5. AWS = technical + nice
     const awsReq = result.requirements.find((r) => r.text.includes("AWS"));
     expect(awsReq).toBeDefined();
     expect(awsReq?.kind).toBe("technical");
     expect(awsReq?.priority).toBe("nice");
 
-    // 6. Unmentioned technologies absent
     const unmentioned = result.requirements.filter((r) =>
       /docker|kubernetes|python/i.test(r.text)
     );
     expect(unmentioned.length).toBe(0);
 
-    // 7. Stable r1, r2 IDs assigned sequentially
     expect(result.requirements[0].id).toBe("r1");
     expect(result.requirements[1].id).toBe("r2");
 
-    // 8. No duplicate requirements
     const reactCount = result.requirements.filter((r) => r.text.includes("React")).length;
     expect(reactCount).toBe(1);
   });

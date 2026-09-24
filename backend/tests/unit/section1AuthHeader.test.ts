@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import http from "node:http";
 import { createApp } from "../../src/app.js";
 
-describe("Section 1: Auth & Header Verification Tests", () => {
+describe("Auth & Header Verification", () => {
   it("GET /api/auth/me returns 401 Unauthorized for unauthenticated requests", async () => {
     const app = createApp();
     const server = http.createServer(app);

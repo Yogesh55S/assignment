@@ -101,12 +101,12 @@ const MOCK_EDITABLE_KIT: EditableInterviewPrepKit = {
   },
 };
 
-describe("Section 2: Category & Schedule Regeneration Verification", () => {
+describe("Category & Schedule Regeneration", () => {
   it("isQuestionProtectedFromRegeneration returns true for user, edited, or pinned questions", () => {
-    expect(isQuestionProtectedFromRegeneration(MOCK_EDITABLE_KIT.questions[0])).toBe(true); // origin = user
-    expect(isQuestionProtectedFromRegeneration(MOCK_EDITABLE_KIT.questions[1])).toBe(true); // edited = true
-    expect(isQuestionProtectedFromRegeneration(MOCK_EDITABLE_KIT.questions[2])).toBe(true); // pinned = true
-    expect(isQuestionProtectedFromRegeneration(MOCK_EDITABLE_KIT.questions[3])).toBe(false); // unprotected
+    expect(isQuestionProtectedFromRegeneration(MOCK_EDITABLE_KIT.questions[0])).toBe(true);
+    expect(isQuestionProtectedFromRegeneration(MOCK_EDITABLE_KIT.questions[1])).toBe(true);
+    expect(isQuestionProtectedFromRegeneration(MOCK_EDITABLE_KIT.questions[2])).toBe(true);
+    expect(isQuestionProtectedFromRegeneration(MOCK_EDITABLE_KIT.questions[3])).toBe(false);
   });
 
   it("findNextQuestionSequence finds highest numeric suffix q5 -> 6", () => {
@@ -144,25 +144,20 @@ describe("Section 2: Category & Schedule Regeneration Verification", () => {
 
     const finalQuestions = result.kit.questions;
 
-    // Preserved check: q1 (user), q2 (edited), q3 (pinned) must exist with unchanged IDs
     expect(finalQuestions.some((q) => q.id === "q1")).toBe(true);
     expect(finalQuestions.some((q) => q.id === "q2")).toBe(true);
     expect(finalQuestions.some((q) => q.id === "q3")).toBe(true);
 
-    // Unprotected q4 should have been replaced
     expect(finalQuestions.some((q) => q.id === "q4")).toBe(false);
 
-    // Other category q5 (behavioural) must remain unchanged
     const q5 = finalQuestions.find((q) => q.id === "q5");
     expect(q5).toBeDefined();
     expect(q5?.category).toBe("behavioural");
 
-    // New generated question must get ID q6
     const newQ = finalQuestions.find((q) => q.id === "q6");
     expect(newQ).toBeDefined();
     expect(newQ?.prompt).toContain("React Server Components");
 
-    // Flashcards must not be modified
     expect(result.kit.flashcards).toEqual(MOCK_EDITABLE_KIT.flashcards);
   });
 

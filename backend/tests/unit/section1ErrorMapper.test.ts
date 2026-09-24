@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { mapError } from "../../../frontend/src/lib/errorMapper.js";
 
-describe("Section 1: Error Mapper Verification Tests", () => {
+describe("Error Mapper Verification", () => {
   it("maps known backend error codes to safe user messages and retryability flags", () => {
     const invalidUrl = mapError("INVALID_COMPANY_URL");
     expect(invalidUrl.message).toBe("Enter a valid public http(s) company website URL.");

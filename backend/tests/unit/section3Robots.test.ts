@@ -8,10 +8,10 @@ import {
 import { crawlCompanySite } from "../../src/services/research/companyCrawler.js";
 import { mapError } from "../../../frontend/src/lib/errorMapper.js";
 
-describe("Section 3 — Task 1: Robots.txt & Blocked Content Verification", () => {
+describe("Robots.txt & Blocked Content Verification", () => {
   const userAgent = "AIInterviewPrepKit/1.0 (+educational-assessment)";
 
-  it("1. derives robots URL as origin + /robots.txt", () => {
+  it("derives robots URL as origin + /robots.txt", () => {
     expect(getRobotsUrl("https://example.com/jobs/senior-dev")).toBe(
       "https://example.com/robots.txt"
     );
@@ -20,7 +20,7 @@ describe("Section 3 — Task 1: Robots.txt & Blocked Content Verification", () =
     );
   });
 
-  it("2. allows all when disallow rules are empty", () => {
+  it("allows all when disallow rules are empty", () => {
     const robotsTxt = `
 User-agent: *
 Disallow:
@@ -30,7 +30,7 @@ Disallow:
     expect(isPathAllowedByRobots("/careers", parsed.disallowRules)).toBe(true);
   });
 
-  it("3. handles wildcard disallow rule", () => {
+  it("handles wildcard disallow rule", () => {
     const robotsTxt = `
 User-agent: *
 Disallow: /
@@ -40,7 +40,7 @@ Disallow: /
     expect(isPathAllowedByRobots("/careers", parsed.disallowRules)).toBe(false);
   });
 
-  it("4. enforces user-agent specific rules taking precedence over wildcard *", () => {
+  it("enforces user-agent specific rules taking precedence over wildcard *", () => {
     const robotsTxt = `
 User-agent: *
 Disallow: /
@@ -56,7 +56,7 @@ Allow: /
     expect(isPathAllowedByRobots("/blocked", parsed.disallowRules, parsed.allowRules)).toBe(false);
   });
 
-  it("5. handles Allow rule overriding a more general or equal Disallow rule", () => {
+  it("handles Allow rule overriding a more general or equal Disallow rule", () => {
     const disallows = ["/api", "/admin"];
     const allows = ["/api/public"];
 
@@ -66,7 +66,7 @@ Allow: /
     expect(isPathAllowedByRobots("/api/public/v1", disallows, allows)).toBe(true);
   });
 
-  it("6. caps Crawl-delay at 5000ms max", () => {
+  it("caps Crawl-delay at 5000ms max", () => {
     const robotsTxt = `
 User-agent: *
 Crawl-delay: 25
@@ -75,7 +75,7 @@ Crawl-delay: 25
     expect(parsed.crawlDelayMs).toBe(5000);
   });
 
-  it("7. handles robots.txt 404 safely (allows crawl, no failure)", async () => {
+  it("handles robots.txt 404 safely (allows crawl, no failure)", async () => {
     const mockFetch = vi.fn().mockResolvedValue(
       new Response("Not Found", { status: 404 })
     );
@@ -94,7 +94,7 @@ Crawl-delay: 25
     expect(rules.warnings).toEqual([]);
   });
 
-  it("8. handles robots.txt network failure gracefully (allows crawl, records warning)", async () => {
+  it("handles robots.txt network failure gracefully (allows crawl, records warning)", async () => {
     const mockFetch = vi.fn().mockRejectedValue(new Error("Network connection reset"));
 
     const rules = await getRobotsRules("https://acme.com", {
@@ -111,7 +111,7 @@ Crawl-delay: 25
     expect(rules.warnings[0].code).toBe("PAGE_FETCH_FAILED");
   });
 
-  it("9. homepage blocked by robots.txt returns ROBOTS_DISALLOWED and does not fetch homepage", async () => {
+  it("homepage blocked by robots.txt returns ROBOTS_DISALLOWED and does not fetch homepage", async () => {
     const mockFetch = vi.fn().mockImplementation(async (url: string) => {
       if (url.endsWith("/robots.txt")) {
         return new Response("User-agent: *\nDisallow: /", { status: 200 });
@@ -132,12 +132,11 @@ Crawl-delay: 25
     const robotsWarning = result.warnings.find((w) => w.code === "ROBOTS_DISALLOWED");
     expect(robotsWarning).toBeDefined();
 
-    // Verify UI error mapper produces required safe research note
     const mapped = mapError(robotsWarning?.code);
     expect(mapped.message).toBe("This company site does not allow automated retrieval for the requested page.");
   });
 
-  it("10. local fixture: linked page blocked skips only blocked page, fetches careers, non-fatal warning", async () => {
+  it("local fixture: linked page blocked skips only blocked page, fetches careers, non-fatal warning", async () => {
     const homepageHtml = `
       <!DOCTYPE html>
       <html>
@@ -191,12 +190,10 @@ Crawl-delay: 25
 
     expect(result.completed).toBe(true);
     expect(result.robots.allowed).toBe(true);
-    // Should have crawled homepage and careers page, but skipped /blocked
     const fetchedUrls = result.pages.map((p) => p.url);
     expect(fetchedUrls.some((u) => u.includes("/careers"))).toBe(true);
     expect(fetchedUrls.some((u) => u.includes("/blocked"))).toBe(false);
 
-    // Should have a non-fatal ROBOTS_DISALLOWED warning for /blocked
     const blockedWarning = result.warnings.find(
       (w) => w.code === "ROBOTS_DISALLOWED" && w.url?.includes("/blocked")
     );

@@ -3,8 +3,8 @@ import { Kit, IKit } from "../../src/models/Kit.js";
 import { FlashcardProgress } from "../../src/models/FlashcardProgress.js";
 import { runKitMigration } from "../../src/scripts/migrateKitDocuments.ts";
 
-describe("Section 3 — Task 3: MongoDB Data Model Review & Schema Hardening", () => {
-  it("1. enforces failed generation kit field is null", () => {
+describe("MongoDB Data Model Validation", () => {
+  it("enforces failed generation kit field is null", () => {
     const failedDoc = new Kit({
       userId: "507f1f77bcf86cd799439011",
       generationStatus: "failed",
@@ -23,7 +23,7 @@ describe("Section 3 — Task 3: MongoDB Data Model Review & Schema Hardening", (
     expect(failedDoc.generationError?.code).toBe("LLM_PROVIDER_ERROR");
   });
 
-  it("2. validates ready kit schema and status", () => {
+  it("validates ready kit schema and status", () => {
     const readyDoc = new Kit({
       userId: "507f1f77bcf86cd799439011",
       generationStatus: "ready",
@@ -46,7 +46,7 @@ describe("Section 3 — Task 3: MongoDB Data Model Review & Schema Hardening", (
     expect(readyDoc.kit).toBeDefined();
   });
 
-  it("3. validates separate flashcard_progress collection unique compound index schema", () => {
+  it("validates separate flashcard_progress collection unique compound index schema", () => {
     const progressDoc = new FlashcardProgress({
       userId: "507f1f77bcf86cd799439011",
       kitId: "507f1f77bcf86cd799439012",
@@ -61,7 +61,6 @@ describe("Section 3 — Task 3: MongoDB Data Model Review & Schema Hardening", (
     expect(progressDoc.confidence).toBe(3);
     expect(progressDoc.covered).toBe(true);
 
-    // Verify index definition
     const indexes = FlashcardProgress.schema.indexes();
     const compoundIndex = indexes.find(
       (idx) => idx[0].userId === 1 && idx[0].kitId === 1 && idx[0].flashcardId === 1
@@ -70,12 +69,12 @@ describe("Section 3 — Task 3: MongoDB Data Model Review & Schema Hardening", (
     expect(compoundIndex?.[1]?.unique).toBe(true);
   });
 
-  it("4. verifies optimistic concurrency versioning (__v) is enabled on Kit schema", () => {
+  it("verifies optimistic concurrency versioning (__v) is enabled on Kit schema", () => {
     expect(Kit.schema.options.optimisticConcurrency).toBe(true);
     expect(Kit.schema.options.timestamps).toBe(true);
   });
 
-  it("5. verifies expected compound indexes exist on Kit schema", () => {
+  it("verifies expected compound indexes exist on Kit schema", () => {
     const indexes = Kit.schema.indexes();
 
     const updatedAtIndex = indexes.find(
@@ -89,7 +88,7 @@ describe("Section 3 — Task 3: MongoDB Data Model Review & Schema Hardening", (
     expect(fingerprintIndex).toBeDefined();
   });
 
-  it("6. validates researchSnapshot field is optional and handles bounded payload", () => {
+  it("validates researchSnapshot field is optional and handles bounded payload", () => {
     const docWithSnapshot = new Kit({
       userId: "507f1f77bcf86cd799439011",
       generationStatus: "ready",
@@ -108,7 +107,7 @@ describe("Section 3 — Task 3: MongoDB Data Model Review & Schema Hardening", (
     });
   });
 
-  it("7. verifies offline dry-run migration script throws clear error if MONGODB_URI is missing", async () => {
+  it("verifies offline dry-run migration script throws clear error if MONGODB_URI is missing", async () => {
     const oldUri = process.env.MONGODB_URI;
     delete process.env.MONGODB_URI;
 
