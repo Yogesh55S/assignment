@@ -35,9 +35,24 @@ export function resetEnvCache(): void {
   parsedEnv = null;
 }
 
+function sanitizeEnvValue(val: string | undefined): string | undefined {
+  if (typeof val !== "string") return val;
+  return val.trim().replace(/^["']|["']$/g, "").trim();
+}
+
+function sanitizeEnvObject(rawEnv: Record<string, string | undefined>): Record<string, string | undefined> {
+  const sanitized: Record<string, string | undefined> = {};
+  for (const [key, val] of Object.entries(rawEnv)) {
+    sanitized[key] = sanitizeEnvValue(val);
+  }
+  return sanitized;
+}
+
 export function getEnv(customEnv?: Record<string, string | undefined>): EnvConfig {
+  const sourceEnv = customEnv ? sanitizeEnvObject(customEnv) : sanitizeEnvObject(process.env as Record<string, string | undefined>);
+
   if (customEnv) {
-    const result = baseEnvSchema.safeParse(customEnv);
+    const result = baseEnvSchema.safeParse(sourceEnv);
     if (!result.success) {
       const errorDetails = result.error.errors
         .map((e) => `${e.path.join(".")}: ${e.message}`)
@@ -51,7 +66,7 @@ export function getEnv(customEnv?: Record<string, string | undefined>): EnvConfi
     return parsedEnv;
   }
 
-  const result = baseEnvSchema.safeParse(process.env);
+  const result = baseEnvSchema.safeParse(sourceEnv);
   if (!result.success) {
     const errorDetails = result.error.errors
       .map((e) => `${e.path.join(".")}: ${e.message}`)

@@ -55,7 +55,7 @@ export function createGeminiClient(options?: {
 
       const isOpenRouter =
         apiKey.startsWith("sk-or-v1-") ||
-        env.LLM_PROVIDER?.toLowerCase() === "openrouter";
+        (env.LLM_PROVIDER?.toLowerCase() === "openrouter" && !options?.apiKey);
 
       const effectiveModel = isOpenRouter
         ? model === "gemini-flash-latest" || model.includes("gemini-2.5")
