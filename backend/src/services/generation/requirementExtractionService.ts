@@ -26,6 +26,54 @@ export const extractedRequirementSchema = z.object({
 
 export type ExtractedRoleData = z.infer<typeof extractedRequirementSchema>;
 
+const KNOWN_TECH_KEYWORDS = new Set([
+  "kubernetes",
+  "docker",
+  "python",
+  "golang",
+  "java",
+  "rust",
+  "react",
+  "angular",
+  "vue",
+  "aws",
+  "gcp",
+  "azure",
+  "graphql",
+  "kafka",
+  "redis",
+  "elasticsearch",
+  "mongodb",
+  "postgresql",
+  "mysql",
+  "terraform",
+  "ansible",
+  "jenkins",
+  "pytorch",
+  "tensorflow",
+  "spark",
+  "hadoop",
+]);
+
+export function isRequirementGrounded(reqText: string, sourceJd: string): boolean {
+  if (!reqText || !sourceJd) return true;
+  const jdLower = sourceJd.toLowerCase();
+
+  const words = reqText.split(/[\s,./()\-+:=]+/).filter((w) => w.length >= 3);
+  if (words.length === 0) return true;
+
+  for (const word of words) {
+    const wordLower = word.toLowerCase();
+    if (KNOWN_TECH_KEYWORDS.has(wordLower)) {
+      if (!jdLower.includes(wordLower)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 export async function extractRoleFromJobDescription(
   jd: string,
   options: {
@@ -71,8 +119,22 @@ export async function extractRoleFromJobDescription(
   const location = rawData.location || "Not specified";
   const responsibilities = rawData.responsibilities.filter((r) => r.length > 0);
 
+  // Filter ungrounded requirements and deduplicate by normalized text
+  const seenTexts = new Set<string>();
+  const uniqueRequirements = rawData.requirements.filter((req) => {
+    if (!isRequirementGrounded(req.text, sanitizedJd)) {
+      return false;
+    }
+    const key = req.text.trim().toLowerCase();
+    if (seenTexts.has(key)) {
+      return false;
+    }
+    seenTexts.add(key);
+    return true;
+  });
+
   // Assign deterministic r1, r2, r3... IDs
-  const requirements = assignRequirementIds(rawData.requirements);
+  const requirements = assignRequirementIds(uniqueRequirements);
 
   return {
     title,

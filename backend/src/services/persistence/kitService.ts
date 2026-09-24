@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Kit, type IKit } from "../../models/Kit.js";
+import { Kit, type IKit, type ISourceMetadata } from "../../models/Kit.js";
 import type { InterviewPrepKit } from "@interview-prep/shared/types/kit";
 import type { EditableInterviewPrepKit } from "@interview-prep/shared/types/editableKit";
 import { validateInterviewPrepKit } from "@interview-prep/shared/validators/kitSchema";
@@ -54,11 +54,26 @@ export class KitService {
   }
 
   /**
-   * Creates a new kit record in 'generating' state.
+   * Finds an existing failed kit document for user and request fingerprint to reuse.
+   */
+  public static async findFailedKitByFingerprint(input: {
+    userId: string;
+    requestFingerprint: string;
+  }): Promise<IKit | null> {
+    return Kit.findOne({
+      userId: input.userId,
+      requestFingerprint: input.requestFingerprint,
+      generationStatus: "failed",
+    });
+  }
+
+  /**
+   * Creates a new kit record in 'generating' state with optional sourceMetadata.
    */
   public static async createGeneratingKit(input: {
     userId: string;
     requestFingerprint: string;
+    sourceMetadata?: ISourceMetadata;
   }): Promise<IKit> {
     try {
       const doc = new Kit({
@@ -66,6 +81,7 @@ export class KitService {
         requestFingerprint: input.requestFingerprint,
         generationStatus: "generating",
         kit: null,
+        sourceMetadata: input.sourceMetadata,
       });
       return await doc.save();
     } catch (err: unknown) {
@@ -79,6 +95,34 @@ export class KitService {
       }
       throw err;
     }
+  }
+
+  /**
+   * Resets an existing failed kit record back to 'generating' state for retrying.
+   */
+  public static async resetFailedKitToGenerating(input: {
+    kitId: string;
+    userId: string;
+    sourceMetadata?: ISourceMetadata;
+  }): Promise<IKit> {
+    const doc = await Kit.findOneAndUpdate(
+      { _id: input.kitId, userId: input.userId },
+      {
+        $set: {
+          generationStatus: "generating",
+          generationError: undefined,
+          kit: null,
+          ...(input.sourceMetadata ? { sourceMetadata: input.sourceMetadata } : {}),
+        },
+      },
+      { new: true }
+    );
+
+    if (!doc) {
+      throw new NotFoundError("Kit not found or ownership mismatch");
+    }
+
+    return doc;
   }
 
   /**
@@ -115,6 +159,7 @@ export class KitService {
 
   /**
    * Marks a generating kit as 'failed' with structured safe error message.
+   * Ensures kit field is null (never stores raw responses or partial kit data).
    */
   public static async markKitFailed(input: {
     kitId: string;
@@ -125,6 +170,7 @@ export class KitService {
       { _id: input.kitId, userId: input.userId },
       {
         $set: {
+          kit: null, // Never store partial kit data on failure
           generationStatus: "failed",
           generationError: {
             code: input.error.code,
@@ -168,7 +214,6 @@ export class KitService {
     if (input.clientUpdatedAt) {
       const clientTime = new Date(input.clientUpdatedAt).getTime();
       const serverTime = existingDoc.updatedAt.getTime();
-      // If server timestamp is newer than client timestamp by more than 1000ms
       if (!isNaN(clientTime) && serverTime - clientTime > 1000) {
         throw new AppError(
           409,
@@ -222,4 +267,3 @@ export class KitService {
     });
   }
 }
-

@@ -19,10 +19,14 @@ export function parseRobotsTxt(
   allowRules?: string[];
   crawlDelayMs?: number;
 } {
-  const targetTokens = [
-    userAgent.trim().toLowerCase(),
-    userAgent.split("/")[0].trim().toLowerCase(),
-  ];
+  const targetTokens = Array.from(
+    new Set([
+      userAgent.trim().toLowerCase(),
+      userAgent.split("/")[0].trim().toLowerCase(),
+      userAgent.split(" ")[0].trim().toLowerCase(),
+      userAgent.split("/")[0].split(" ")[0].trim().toLowerCase(),
+    ])
+  ).filter(Boolean);
 
   const lines = robotsText.split(/\r?\n/);
 
@@ -116,6 +120,7 @@ export function isPathAllowedByRobots(
 
   let maxDisallowMatchLength = -1;
   for (const rule of disallowRules) {
+    if (!rule) continue;
     if (path.startsWith(rule) && rule.length > maxDisallowMatchLength) {
       maxDisallowMatchLength = rule.length;
     }
@@ -127,6 +132,7 @@ export function isPathAllowedByRobots(
 
   let maxAllowMatchLength = -1;
   for (const rule of allowRules) {
+    if (!rule) continue;
     if (path.startsWith(rule) && rule.length > maxAllowMatchLength) {
       maxAllowMatchLength = rule.length;
     }
@@ -186,6 +192,7 @@ export async function getRobotsRules(
         fetched: true,
         allowed: true,
         disallowRules: [],
+        allowRules: [],
         warnings: [],
       };
     }
@@ -202,6 +209,7 @@ export async function getRobotsRules(
         fetched: false,
         allowed: true,
         disallowRules: [],
+        allowRules: [],
         warnings,
       };
     }
@@ -219,6 +227,7 @@ export async function getRobotsRules(
       fetched: true,
       allowed,
       disallowRules: parsed.disallowRules,
+      allowRules: parsed.allowRules ?? [],
       crawlDelayMs: parsed.crawlDelayMs,
       warnings: [],
     };
@@ -235,6 +244,7 @@ export async function getRobotsRules(
       fetched: false,
       allowed: true,
       disallowRules: [],
+      allowRules: [],
       warnings,
     };
   }

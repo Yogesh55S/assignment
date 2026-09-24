@@ -11,7 +11,8 @@ export type ResearchWarningCode =
   | "NO_RELEVANT_INTERNAL_LINKS"
   | "NO_HIRING_PAGE_FOUND"
   | "NO_PUBLIC_INTERVIEW_DISCUSSION"
-  | "MAX_PAGE_LIMIT_REACHED";
+  | "MAX_PAGE_LIMIT_REACHED"
+  | "PARTIAL_REGENERATION_WARNING";
 
 export interface ResearchWarning {
   code: ResearchWarningCode;
@@ -35,6 +36,7 @@ export interface RobotsRules {
   fetched: boolean;
   allowed: boolean;
   disallowRules: string[];
+  allowRules?: string[];
   crawlDelayMs?: number;
   warnings: ResearchWarning[];
 }

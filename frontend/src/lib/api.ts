@@ -185,6 +185,12 @@ export async function deleteKit(id: string): Promise<void> {
   });
 }
 
+export async function retryKit(id: string): Promise<CreateKitResponse> {
+  return apiRequest<CreateKitResponse>(`/api/kits/${id}/retry`, {
+    method: "POST",
+  });
+}
+
 export async function regenerateKitSection(
   id: string,
   request: RegenerateSectionRequest,

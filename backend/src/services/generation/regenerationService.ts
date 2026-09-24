@@ -207,6 +207,8 @@ export async function regenerateQuestionCategoryHelper(
     return false;
   });
 
+  const warnings: ResearchWarning[] = [];
+
   let newQuestionDrafts = await generateQuestionsForCategory({
     category,
     requirements: relevantRequirements,
@@ -214,6 +216,13 @@ export async function regenerateQuestionCategoryHelper(
     interviewDiscussion: discussionResult,
     llmClient: options.llmClient,
   });
+
+  if (relevantRequirements.length > 0 && newQuestionDrafts.length < relevantRequirements.length) {
+    warnings.push({
+      code: "PARTIAL_REGENERATION_WARNING",
+      message: "Fewer questions were generated because some model results were unavailable or invalid.",
+    });
+  }
 
   // Deduplicate new questions against preserved questions by prompt
   const existingPrompts = new Set(

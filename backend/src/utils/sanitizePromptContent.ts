@@ -2,7 +2,7 @@ export function sanitizeUntrustedContent(input: string, maxChars: number): strin
   if (!input) return "";
 
   // Strip null bytes and control characters except standard whitespace
-  let text = input.replace(/\0/g, "").replace(/[\x01-\x08\x0B\x0C\x0E-\x1F]/g, " ");
+  let text = input.replace(/[\0\x01-\x08\x0B\x0C\x0E-\x1F\x7F]/g, " ");
 
   // Normalize excessive spaces and linebreaks
   text = text

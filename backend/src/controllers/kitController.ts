@@ -6,7 +6,6 @@ import { createRequestFingerprint } from "../utils/requestFingerprint.js";
 import {
   AppError,
   NotFoundError,
-  NotImplementedError,
   UnauthorizedError,
 } from "../utils/errors.js";
 
@@ -83,6 +82,13 @@ export class KitController {
       days: parsedInput.days,
     });
 
+    const sourceMetadata = {
+      company_url: parsedInput.company_url,
+      days: parsedInput.days,
+      jd_chars: parsedInput.jd.length,
+      jd: parsedInput.jd,
+    };
+
     // 1. Check if a ready kit already exists for this exact request
     const reusableKit = await KitService.findReusableKit({
       userId,
@@ -112,11 +118,26 @@ export class KitController {
       return;
     }
 
-    // 3. Create a generating record
-    const kitRecord = await KitService.createGeneratingKit({
+    // 3. Check if a failed kit exists for this fingerprint — reuse it instead of creating duplicate records
+    const failedKit = await KitService.findFailedKitByFingerprint({
       userId,
       requestFingerprint,
     });
+
+    let kitRecord;
+    if (failedKit) {
+      kitRecord = await KitService.resetFailedKitToGenerating({
+        kitId: failedKit._id.toString(),
+        userId,
+        sourceMetadata,
+      });
+    } else {
+      kitRecord = await KitService.createGeneratingKit({
+        userId,
+        requestFingerprint,
+        sourceMetadata,
+      });
+    }
 
     try {
       // Execute multi-step kit generation pipeline
@@ -150,9 +171,87 @@ export class KitController {
       const errorMessage =
         err instanceof Error ? err.message : "Kit generation encountered an error.";
 
-      // Mark kit record as failed
+      // Mark kit record as failed (kit is set to null, safe error object stored)
       await KitService.markKitFailed({
         kitId: kitRecord._id.toString(),
+        userId,
+        error: { code: errorCode, message: errorMessage },
+      });
+
+      throw err;
+    }
+  }
+
+  /**
+   * POST /api/kits/:id/retry
+   * Retries kit generation for an existing failed kit document.
+   */
+  public static async retryKit(req: Request, res: Response): Promise<void> {
+    if (!req.user) {
+      throw new UnauthorizedError();
+    }
+
+    const userId = req.user.id;
+    const kitId = req.params.id;
+
+    const existingDoc = await KitService.findKitById(userId, kitId);
+    if (!existingDoc) {
+      throw new NotFoundError("Kit not found or access denied");
+    }
+
+    if (existingDoc.generationStatus !== "failed") {
+      throw new AppError(
+        400,
+        "INVALID_RETRY",
+        "Only failed kits can be retried."
+      );
+    }
+
+    const sourceMeta = existingDoc.sourceMetadata;
+    if (!sourceMeta || !sourceMeta.jd || !sourceMeta.company_url || !sourceMeta.days) {
+      throw new AppError(
+        400,
+        "INVALID_RETRY_DATA",
+        "Original job description metadata is missing for retry."
+      );
+    }
+
+    // Reset status to generating
+    await KitService.resetFailedKitToGenerating({
+      kitId,
+      userId,
+    });
+
+    try {
+      const generationResult = await generateInterviewPrepKit(
+        {
+          jd: sourceMeta.jd,
+          companyUrl: sourceMeta.company_url,
+          days: sourceMeta.days,
+        },
+        {
+          userId,
+        }
+      );
+
+      const readyDoc = await KitService.markKitReady({
+        kitId,
+        userId,
+        kit: generationResult.kit,
+        warnings: generationResult.researchWarnings,
+      });
+
+      res.status(200).json({
+        kit: readyDoc,
+        reused: false,
+        warnings: generationResult.researchWarnings,
+      });
+    } catch (err: unknown) {
+      const errorCode = err instanceof AppError ? err.code : "GENERATION_FAILED";
+      const errorMessage = err instanceof Error ? err.message : "Kit generation encountered an error.";
+
+      await KitService.markKitFailed({
+        kitId,
         userId,
         error: { code: errorCode, message: errorMessage },
       });
@@ -321,4 +420,3 @@ export class KitController {
     res.status(200).json(result);
   }
 }
-

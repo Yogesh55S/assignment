@@ -12,6 +12,7 @@ router.get("/", asyncHandler(KitController.getKits));
 router.post("/", asyncHandler(KitController.createKit));
 router.get("/:id", asyncHandler(KitController.getKitById));
 router.get("/:id/status", asyncHandler(KitController.getKitStatus));
+router.post("/:id/retry", asyncHandler(KitController.retryKit));
 router.patch("/:id", asyncHandler(KitController.updateKit));
 router.delete("/:id", asyncHandler(KitController.deleteKit));
 router.post("/:id/regenerate", asyncHandler(KitController.regenerateSection));
@@ -19,4 +20,3 @@ router.get("/:id/practice", asyncHandler(KitController.getPractice));
 router.post("/:id/practice", asyncHandler(KitController.savePractice));
 
 export default router;
-

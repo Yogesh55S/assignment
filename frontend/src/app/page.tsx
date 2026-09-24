@@ -1,8 +1,14 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { Header } from "../components/Header";
+import { useAuth } from "../context/AuthContext";
 
 export default function HomePage() {
+  const { status } = useAuth();
+  const isAuthenticated = status === "authenticated";
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -21,18 +27,29 @@ export default function HomePage() {
         </p>
 
         <div className="flex flex-col min-[425px]:flex-row items-center gap-3 sm:gap-4 w-full min-[425px]:w-auto px-4">
-          <Link
-            href="/register"
-            className="w-full min-[425px]:w-auto px-6 sm:px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm sm:text-base rounded-lg shadow-sm hover:shadow transition text-center"
-          >
-            Get Started
-          </Link>
-          <Link
-            href="/login"
-            className="w-full min-[425px]:w-auto px-6 sm:px-8 py-3 bg-white hover:bg-slate-50 text-slate-700 font-medium text-sm sm:text-base rounded-lg border border-slate-300 transition text-center"
-          >
-            Sign In
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href="/dashboard"
+              className="w-full min-[425px]:w-auto px-6 sm:px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm sm:text-base rounded-lg shadow-sm hover:shadow transition text-center"
+            >
+              Go to Dashboard &rarr;
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/register"
+                className="w-full min-[425px]:w-auto px-6 sm:px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm sm:text-base rounded-lg shadow-sm hover:shadow transition text-center"
+              >
+                Get Started
+              </Link>
+              <Link
+                href="/login"
+                className="w-full min-[425px]:w-auto px-6 sm:px-8 py-3 bg-white hover:bg-slate-50 text-slate-700 font-medium text-sm sm:text-base rounded-lg border border-slate-300 transition text-center"
+              >
+                Sign In
+              </Link>
+            </>
+          )}
         </div>
 
         <div className="mt-12 sm:mt-16 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 text-left w-full px-2 sm:px-0">

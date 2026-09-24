@@ -267,7 +267,7 @@ export async function crawlCompanySite(
     // Robots.txt check
     try {
       const candidatePath = new URL(candidate.url).pathname;
-      if (!isPathAllowedByRobots(candidatePath, robots.disallowRules)) {
+      if (!isPathAllowedByRobots(candidatePath, robots.disallowRules, robots.allowRules ?? [])) {
         warnings.push({
           code: "ROBOTS_DISALLOWED",
           message: `Discovered page disallowed by robots.txt: ${candidate.url}`,

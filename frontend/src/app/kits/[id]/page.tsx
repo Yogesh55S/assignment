@@ -31,10 +31,14 @@ import type {
 } from "@interview-prep/shared/types/editableKit";
 import type { QuestionCategory } from "@interview-prep/shared/types/kit";
 
+import { FailedKitView } from "../../../components/FailedKitView";
+import { useToast } from "../../../components/ToastProvider";
+
 export default function KitBuilderPage() {
   const params = useParams();
   const router = useRouter();
   const kitId = params.id as string;
+  const { showToast } = useToast();
 
   const [user, setUser] = useState<UserSession | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -64,7 +68,11 @@ export default function KitBuilderPage() {
 
       const response = await getKit(kitId);
       setKitData(response.kit);
-      setDraft(JSON.parse(JSON.stringify(response.kit.kit)));
+      if (response.kit.generationStatus === "ready" && response.kit.kit) {
+        setDraft(JSON.parse(JSON.stringify(response.kit.kit)));
+      } else {
+        setDraft(null);
+      }
       setLastSavedAt(response.kit.updatedAt);
       setSaveState("saved");
       setError(null);
@@ -216,9 +224,14 @@ export default function KitBuilderPage() {
       setDraft(JSON.parse(JSON.stringify(res.kit.kit)));
       setLastSavedAt(res.kit.updatedAt);
       setSaveState("saved");
+
+      const catName = category.charAt(0).toUpperCase() + category.slice(1);
+      const coverageStatus = (res.kit.kit.coverage?.uncovered_requirement_ids?.length || 0) === 0 ? "Complete" : "Needs review";
+      showToast(`${catName} questions regenerated. Replaced: ${res.regeneratedCount} | Preserved: ${res.preservedCount} | Coverage: ${coverageStatus}`, "success");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to regenerate category questions.";
       setError(msg);
+      showToast(msg, "error");
     } finally {
       setIsRegenerating(null);
     }
@@ -246,9 +259,16 @@ export default function KitBuilderPage() {
       setDraft(JSON.parse(JSON.stringify(res.kit.kit)));
       setLastSavedAt(res.kit.updatedAt);
       setSaveState("saved");
+
+      const daysCount = res.kit.kit.schedule.days_available;
+      const scheduledQCount = res.kit.kit.schedule.days.reduce((acc, d) => acc + (d.question_ids?.length || 0), 0);
+      const totalMins = res.kit.kit.schedule.days.reduce((acc, d) => acc + (d.minutes || 0), 0);
+
+      showToast(`Schedule regenerated: ${daysCount} days, ${scheduledQCount} scheduled questions, ${totalMins} total minutes.`, "success");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to regenerate schedule.";
       setError(msg);
+      showToast(msg, "error");
     } finally {
       setIsRegenerating(null);
     }
@@ -272,6 +292,17 @@ export default function KitBuilderPage() {
           <LoadingState message="Loading kit builder..." />
         </main>
       </div>
+    );
+  }
+
+  if (kitData?.generationStatus === "failed") {
+    return (
+      <FailedKitView
+        kitId={kitId}
+        errorCode={kitData.generationError?.code}
+        errorMessage={kitData.generationError?.message}
+        onSuccessRetry={loadKitData}
+      />
     );
   }
 

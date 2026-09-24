@@ -110,8 +110,11 @@ export function QuestionCard({
       {/* Top bar: ID, metadata badges, controls */}
       <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-200/70 dark:border-slate-800">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-200/80 dark:bg-slate-800 px-2 py-0.5 rounded">
-            {question.id}
+          <span className="font-bold text-sm text-slate-900 dark:text-white">
+            Question {index + 1}
+          </span>
+          <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+            ID: {question.id}
           </span>
 
           {/* Badges */}
