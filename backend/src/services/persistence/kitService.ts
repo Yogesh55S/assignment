@@ -11,7 +11,9 @@ export class KitService {
    * Retrieves all kits owned by a specific authenticated user, newest first.
    */
   public static async getUserKits(userId: string): Promise<IKit[]> {
-    return Kit.find({ userId }).sort({ createdAt: -1 });
+    // Automatically purge any old failed kit documents from database
+    await Kit.deleteMany({ userId, generationStatus: "failed" }).catch(() => {});
+    return Kit.find({ userId, generationStatus: { $ne: "failed" } }).sort({ createdAt: -1 });
   }
 
   /**

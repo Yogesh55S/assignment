@@ -166,17 +166,12 @@ export class KitController {
         warnings: generationResult.researchWarnings,
       });
     } catch (err: unknown) {
-      const errorCode =
-        err instanceof AppError ? err.code : "GENERATION_FAILED";
-      const errorMessage =
-        err instanceof Error ? err.message : "Kit generation encountered an error.";
-
-      // Mark kit record as failed (kit is set to null, safe error object stored)
-      await KitService.markKitFailed({
-        kitId: kitRecord._id.toString(),
+      // If kit generation failed, remove the pending placeholder record from MongoDB
+      // so failed or duplicate kit documents are not persisted in the database.
+      await KitService.deleteKitById({
         userId,
-        error: { code: errorCode, message: errorMessage },
-      });
+        kitId: kitRecord._id.toString(),
+      }).catch(() => {});
 
       throw err;
     }

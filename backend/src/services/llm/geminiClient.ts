@@ -53,29 +53,63 @@ export function createGeminiClient(options?: {
         throw new LlmNotConfiguredError();
       }
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-        model
-      )}:generateContent`;
+      const isOpenRouter =
+        apiKey.startsWith("sk-or-v1-") ||
+        env.LLM_PROVIDER?.toLowerCase() === "openrouter";
+
+      const effectiveModel = isOpenRouter
+        ? model === "gemini-flash-latest" || model.includes("gemini-2.5")
+          ? "openai/gpt-4o"
+          : model
+        : model;
+
+      const endpoint = isOpenRouter
+        ? "https://openrouter.ai/api/v1/chat/completions"
+        : `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+            effectiveModel
+          )}:generateContent`;
 
       const maxRetries = request.maxRetries ?? 3;
       const timeoutMs = request.timeoutMs ?? 30000;
       const temperature = request.temperature ?? 0.2;
 
-      const bodyPayload = {
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: request.userPrompt }],
-          },
-        ],
-        systemInstruction: {
-          parts: [{ text: request.systemInstruction }],
-        },
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature,
-        },
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
       };
+
+      if (isOpenRouter) {
+        headers["Authorization"] = `Bearer ${apiKey}`;
+        headers["HTTP-Referer"] = env.CLIENT_URL || "https://interviewprep.app";
+        headers["X-Title"] = "AI Interview Prep Kit";
+      } else {
+        headers["x-goog-api-key"] = apiKey;
+      }
+
+      const bodyPayload = isOpenRouter
+        ? {
+            model: effectiveModel,
+            messages: [
+              { role: "system", content: request.systemInstruction },
+              { role: "user", content: request.userPrompt },
+            ],
+            temperature,
+            response_format: { type: "json_object" },
+          }
+        : {
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: request.userPrompt }],
+              },
+            ],
+            systemInstruction: {
+              parts: [{ text: request.systemInstruction }],
+            },
+            generationConfig: {
+              responseMimeType: "application/json",
+              temperature,
+            },
+          };
 
       let lastError: unknown = null;
 
@@ -94,10 +128,7 @@ export function createGeminiClient(options?: {
         try {
           const res = await fetchFn(endpoint, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-goog-api-key": apiKey,
-            },
+            headers,
             body: JSON.stringify(bodyPayload),
             signal: controller.signal,
           });
@@ -126,33 +157,46 @@ export function createGeminiClient(options?: {
               await sleepFn(delayMs);
               continue;
             }
-            throw new LlmProviderError(res.status, `Gemini server error (${res.status})`, true);
+            throw new LlmProviderError(res.status, `LLM provider server error (${res.status})`, true);
           }
 
           if (!res.ok) {
             // Non-retryable 4xx client error (e.g. 400 Bad Request)
             throw new LlmProviderError(
               res.status,
-              `Gemini API request rejected with HTTP ${res.status}`,
+              `LLM API request rejected with HTTP ${res.status}`,
               false
             );
           }
 
           const json = await res.json();
 
-          // Safe extraction from Gemini response schema
-          const candidate = json.candidates?.[0];
-          if (!candidate) {
-            const promptFeedback = json.promptFeedback?.blockReason;
-            if (promptFeedback) {
-              throw new LlmInvalidResponseError(`Gemini generation blocked: ${promptFeedback}`);
+          let rawText: string | undefined;
+
+          if (isOpenRouter) {
+            const messageObj = json.choices?.[0]?.message;
+            if (typeof messageObj?.content === "string") {
+              rawText = messageObj.content;
+            } else if (Array.isArray(messageObj?.content)) {
+              rawText = messageObj.content
+                .map((part: { text?: string }) => part.text || "")
+                .join("");
             }
-            throw new LlmInvalidResponseError("Gemini returned no candidates in response.");
+          } else {
+            // Safe extraction from Gemini response schema
+            const candidate = json.candidates?.[0];
+            if (!candidate) {
+              const promptFeedback = json.promptFeedback?.blockReason;
+              if (promptFeedback) {
+                throw new LlmInvalidResponseError(`Gemini generation blocked: ${promptFeedback}`);
+              }
+              throw new LlmInvalidResponseError("Gemini returned no candidates in response.");
+            }
+            rawText = candidate.content?.parts?.[0]?.text;
           }
 
-          const rawText = candidate.content?.parts?.[0]?.text;
           if (!rawText || typeof rawText !== "string" || !rawText.trim()) {
-            throw new LlmInvalidResponseError("Gemini candidate content is empty.");
+            throw new LlmInvalidResponseError("LLM response content is empty.");
           }
 
           const cleaned = cleanJsonText(rawText);
@@ -160,7 +204,7 @@ export function createGeminiClient(options?: {
           try {
             parsedData = JSON.parse(cleaned) as T;
           } catch {
-            throw new LlmInvalidResponseError("Failed to parse Gemini output as JSON.");
+            throw new LlmInvalidResponseError("Failed to parse LLM output as JSON.");
           }
 
           const usage = json.usageMetadata
@@ -169,12 +213,18 @@ export function createGeminiClient(options?: {
                 completionTokens: json.usageMetadata.candidatesTokenCount,
                 totalTokens: json.usageMetadata.totalTokenCount,
               }
+            : json.usage
+            ? {
+                promptTokens: json.usage.prompt_tokens,
+                completionTokens: json.usage.completion_tokens,
+                totalTokens: json.usage.total_tokens,
+              }
             : undefined;
 
           return {
             data: parsedData,
             rawText: cleaned,
-            model,
+            model: effectiveModel,
             usage,
           };
         } catch (err: unknown) {

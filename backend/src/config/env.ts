@@ -19,6 +19,7 @@ const baseEnvSchema = z.object({
   CLIENT_URL: z.string().default("http://localhost:3000"),
   LLM_API_KEY: z.string().optional(),
   LLM_MODEL: z.string().optional(),
+  LLM_PROVIDER: z.string().optional(),
   ALLOW_LOCAL_FETCH: z
     .union([z.boolean(), z.string()])
     .transform((val) => val === true || val === "true" || val === "1")
