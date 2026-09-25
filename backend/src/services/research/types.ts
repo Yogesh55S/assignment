@@ -105,8 +105,9 @@ export const DEFAULT_CRAWLER_OPTIONS: Required<CompanyCrawlerOptions> = {
   maxPages: 8,
   maxRankedLinksToConsider: 20,
   requestDelayMs: 350,
-  timeoutMs: 8000,
-  maxContentBytes: 1_000_000,
+  timeoutMs: 10_000,
+  maxContentBytes: 3_000_000,
   maxRetries: 3,
   userAgent: "AIInterviewPrepKit/1.0 (+educational-assessment)",
 };
+
