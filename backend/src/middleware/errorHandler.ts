@@ -29,6 +29,9 @@ export function errorHandler(
 
   // Handle known AppError instances
   if (err instanceof AppError) {
+    if (err.statusCode >= 400) {
+      console.warn(`[AppError] [req:${requestId}] ${err.code} (${err.statusCode}): ${err.message}`);
+    }
     res.status(err.statusCode).json({
       error: {
         code: err.code,
